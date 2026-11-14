@@ -1,5 +1,6 @@
 # librerías ---------------------------------------------------------------------------------------------------
 import os
+import shutil # para copiar archivos (opción 6)
 
 # Funciones de gestión de archivos ----------------------------------------------------------------------------
 
@@ -48,6 +49,52 @@ def crear_archivo_txt(nombre):
 
 
 
+def renombrar_archivo(nombre_actual, nombre_nuevo):
+    # Validamos que el archivo que se quiere renombrar exista y sea un archivo (no una carpeta)
+    if not os.path.isfile(nombre_actual):
+        return "Error: el archivo " + nombre_actual + " no existe"
+
+    # Si el nuevo nombre ya está ocupado no renombramos, para no reemplazar otro archivo sin querer
+    if os.path.exists(nombre_nuevo):
+        return "Error: ya existe un archivo con el nombre " + nombre_nuevo
+
+    try:
+        # os.rename le pide al sistema operativo cambiar la entrada del archivo en el directorio.
+        # El contenido no se mueve ni se copia, solo cambia el nombre con el que se encuentra.
+        os.rename(nombre_actual, nombre_nuevo)
+    except OSError as error:
+        # Por ejemplo: el archivo está abierto en otro programa o no hay permisos
+        return "Error al renombrar: " + str(error)
+
+    return "se ha renombrado " + nombre_actual + " a " + nombre_nuevo
+
+
+
+def copiar_archivo(nombre_origen, nombre_copia):
+    # Validamos que el archivo original exista y sea un archivo
+    if not os.path.isfile(nombre_origen):
+        return "Error: el archivo " + nombre_origen + " no existe"
+
+    # Igual que al crear archivos: si el nombre de la copia ya existe buscamos uno libre
+    # "copia (1).txt", "copia (2).txt", etc, para no sobrescribir nada
+    base, extension = os.path.splitext(nombre_copia)
+    ruta_final = nombre_copia
+    contador = 1
+    while os.path.exists(ruta_final):
+        ruta_final = f"{base} ({contador}){extension}"
+        contador += 1
+
+    try:
+        # shutil.copy2 crea un archivo nuevo con el mismo contenido
+        # y además conserva los metadatos, como la fecha de modificación
+        shutil.copy2(nombre_origen, ruta_final)
+    except OSError as error:
+        return "Error al copiar: " + str(error)
+
+    return "se ha creado la copia: " + ruta_final
+
+
+
 
 # Programa principal ---------------------------------------------------------------------------------
 
@@ -78,6 +125,18 @@ if __name__ == "__main__":
         elif opcion == "2":
             input_nombre = input("\nIngrese el nombre del archivo a crear: ")
             print(crear_archivo_txt(input_nombre))
+            input("\nPresione Enter para continuar...")
+
+        elif opcion == "5":
+            input_actual = input("\nIngrese el nombre del archivo a renombrar: ")
+            input_nuevo = input("Ingrese el nuevo nombre: ")
+            print(renombrar_archivo(input_actual, input_nuevo))
+            input("\nPresione Enter para continuar...")
+
+        elif opcion == "6":
+            input_origen = input("\nIngrese el nombre del archivo a copiar: ")
+            input_copia = input("Ingrese el nombre de la copia: ")
+            print(copiar_archivo(input_origen, input_copia))
             input("\nPresione Enter para continuar...")
 
         elif opcion == "0": # Salida
