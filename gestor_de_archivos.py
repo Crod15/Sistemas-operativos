@@ -47,7 +47,72 @@ def crear_archivo_txt(nombre):
 
     return "se ha creado el archivo: " + ruta_final
 
+def escribir_archivo(nombre):
+    # Verificamos si al nombre le falta el ".txt" para agregárselo y que coincida con cómo se crean en la opción 2
+    if not nombre.endswith(".txt"):
+        nombre += ".txt"
 
+    # Validamos que el archivo exista y que sea un archivo (no una carpeta) antes de intentar escribir
+    if not os.path.isfile(nombre):
+        return "Error: el archivo " + nombre + " no existe"
+
+    #Si existe, pedimos el texto al usuario
+    contenido= input("Ingrese la información a escribir: ")
+    
+    try:
+        # Abrimos el archivo usando su descriptor en el sistema operativo.
+        # os.O_WRONLY abre el archivo únicamente en modo de escritura.
+        # os.O_APPEND mueve el puntero al final del archivo en cada escritura, para agregar la nueva información sin borrar lo que ya tenía antes.
+        descriptor = os.open(nombre, os.O_WRONLY | os.O_APPEND)
+
+        # Usamos codificación UTF-8 para evitar problemas con caracteres especiales, además separamos con un salto de linea.
+        datos_bytes = (contenido + "\n").encode("utf-8")
+
+        # Pedimosal sistema operativo escribir esos bytes en el archivo asociado al descriptor
+        os.write(descriptor, datos_bytes)
+
+        # Cerramos el descriptor para que los cambios se guarden en disco y liberar el recurso
+        os.close(descriptor)
+        
+    except OSError as error:
+        return "Error al escribir en el archivo: " + str(error)
+
+    return "se ha agregado la información al archivo: " + nombre
+
+
+
+def leer_archivo(nombre):
+    # Igual que en las funciones anteriores, aseguramos la extensión ".txt" si el usuario no la puso
+    if not nombre.endswith(".txt"):
+        nombre += ".txt"
+
+    # Validamos que el archivo exista y no sea un directorio antes de leerlo
+    if not os.path.isfile(nombre):
+        return "Error: el archivo " + nombre + " no existe"
+
+    try:
+        # os.O_RDONLY le indica al sistema operativo que solo vamos a abrir el archivo en modo lectura (read-only)
+        descriptor = os.open(nombre, os.O_RDONLY)
+
+        # Consultamos el tamaño total del archivo en bytes para saber cuánto debemos leer con os.read
+        tamano = os.path.getsize(nombre)
+
+        # os.read recibe el descriptor y la cantidad de bytes que queremos traer de memoria
+        bytes_leidos = os.read(descriptor, tamano)
+
+        # Cerramos el descriptor apenas terminamos de leer para liberar recursos del sistema
+        os.close(descriptor)
+
+        # Convertimos los bytes leídos de vuelta a texto normal (string) usando decodificación UTF-8
+        contenido = bytes_leidos.decode("utf-8")
+
+        # Si el archivo recién se creó y no tiene nada escrito todavía, avisamos que está vacío
+        if contenido == "":
+            return "El archivo " + nombre + " está vacío"
+
+        return "\n--- Contenido de " + nombre + " ---\n" + contenido.rstrip("\n") + "\n-------------------------------"
+    except OSError as error:
+        return "Error al leer el archivo: " + str(error)
 
 def renombrar_archivo(nombre_actual, nombre_nuevo):
     # Validamos que el archivo que se quiere renombrar exista y sea un archivo (no una carpeta)
@@ -67,8 +132,6 @@ def renombrar_archivo(nombre_actual, nombre_nuevo):
         return "Error al renombrar: " + str(error)
 
     return "se ha renombrado " + nombre_actual + " a " + nombre_nuevo
-
-
 
 def copiar_archivo(nombre_origen, nombre_copia):
     # Validamos que el archivo original exista y sea un archivo
@@ -96,9 +159,15 @@ def copiar_archivo(nombre_origen, nombre_copia):
 
 
 
-# Programa principal ---------------------------------------------------------------------------------
+# ===================================================
+#               Programa principal
+#====================================================
 
 if __name__ == "__main__":
+    # Aseguramos que el programa se ejecute si existe la carpeta de trabajo "GESTOR_SO" y nos ubicamos en ella.
+    os.makedirs("GESTOR_SO", exist_ok=True)
+    os.chdir("GESTOR_SO")
+     
     while True:
         print("\nBienvenido al Gestor de Archivos")
         print("Seleccione una opción válida:\n")
@@ -125,6 +194,16 @@ if __name__ == "__main__":
         elif opcion == "2":
             input_nombre = input("\nIngrese el nombre del archivo a crear: ")
             print(crear_archivo_txt(input_nombre))
+            input("\nPresione Enter para continuar...")
+        
+        elif opcion == "3":
+            input_nombre = input("\nIngrese el nombre del archivo en el que desea escribir: ")
+            print(escribir_archivo(input_nombre))
+            input("\nPresione Enter para continuar...")
+
+        elif opcion == "4":
+            input_nombre = input("\nIngrese el nombre del archivo a leer: ")
+            print(leer_archivo(input_nombre))
             input("\nPresione Enter para continuar...")
 
         elif opcion == "5":
