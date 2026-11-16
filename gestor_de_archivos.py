@@ -155,7 +155,53 @@ def copiar_archivo(nombre_origen, nombre_copia):
         return "Error al copiar: " + str(error)
 
     return "se ha creado la copia: " + ruta_final
+    
+def elminar_archivo(nombre):   
+    #
+    if os.path.exists(nombre):
+        #
+        if os.path.isfile(nombre):
 
+            confirmar = input("Esta seguro que desea eliminar el archivo: s/n")
+            
+            if confirmar.lower() == "s":
+                os.remove(nombre)  
+            
+            else:
+                print("Se ha cancelado la eliminación del archivo")
+
+        else:
+            print("La ruta corresponde a un directorio, no a un archivo")
+
+
+    else:
+        print("El archivo no existe")  
+
+def listar_archivos(nombre_directorio):
+
+    if os.path.exists(nombre_directorio):
+
+        if os.path.isdir(nombre_directorio):
+
+            elementos = os.listdir(nombre_directorio)
+
+            print("\nContenido del directorio:")
+
+            for elemento in elementos:
+
+                ruta = os.path.join(nombre_directorio, elemento)
+
+                if os.path.isfile(ruta):
+                    print("[ARCHIVO]", elemento)
+
+                elif os.path.isdir(ruta):
+                    print("[CARPETA]", elemento)
+
+        else:
+            print("La ruta no corresponde a un directorio")
+
+    else:
+        print("El directorio no existe")
 
 
 
@@ -216,6 +262,16 @@ if __name__ == "__main__":
             input_origen = input("\nIngrese el nombre del archivo a copiar: ")
             input_copia = input("Ingrese el nombre de la copia: ")
             print(copiar_archivo(input_origen, input_copia))
+            input("\nPresione Enter para continuar...")
+
+        elif opcion == "7":
+            input_nombre = input("\nIngrese el nombre del archivo a eliminar: ")
+            elminar_archivo(input_nombre)
+            input("\nPresione Enter para continuar...")
+
+        elif opcion == "8":
+            input_nombre = input("\nIngrese el directorio que desea listar: ")
+            listar_archivos(input_nombre)
             input("\nPresione Enter para continuar...")
 
         elif opcion == "0": # Salida
